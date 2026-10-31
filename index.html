@@ -78,14 +78,14 @@ function render(){
 document.getElementById("agent").textContent=AGENT;
 const ans=num("Voice Answered"),aht=num("Voice Answered AHT"),csat=num("Voice CSAT"),fcr=num("Voice FCR"),res=num("Voice Agent Resolution"),take=num("Voice Answered Take Rate (calibrated)"),trf=num("Voice Answered Transfer to Survey % (calibrated)"),pay=num("Status - Pay to Performance"),book=num("Revenue - Bookings (Post Recoup)"),acq=num("Revenue - ACQ + CROSS (Post Recoup)"),ren=num("Revenue - REN (Post Recoup)");
 document.getElementById("mtd").innerHTML="<thead><tr><th>METRIC</th><th style='text-align:right'>SCORE</th></tr></thead><tbody>"+
-row3("Voice Answered",N(ans))+row3("Voice Answered AHT",N(aht))+row3("Voice CSAT",N(csat,2))+row3("Voice Agent Resolution",P(res))+row3("Voice FCR",P(fcr))+row3("Voice Answered Take Rate",P(take))+row3("Voice Answered Transfer to Survey %",P(trf))+row3("Status - Pay to Performance",P(pay))+"</tbody>";
+row3("CALLS",N(ans))+row3("AHT",N(aht))+row3("CSAT",N(csat,2))+row3("VRR",P(res))+row3("FCR",P(take))+row3("XFER TO SURVEY",P(trf))+row3("P2P",P(pay))+"</tbody>";
 const tot=ok(acq)&&ok(ren)?acq+ren:NaN,pc=ok(acq)&&ok(ans)&&ans?acq/ans:NaN;
 const miss=ok(pc)?(pc<10?10*ans-acq:0):NaN;
 let inc=NaN;if(ok(book)){inc=0;const K=[500,1000,2000,3000,3500,4000,4500,5000,5500,6000,6500,7000],V=[1750,3250,4750,5000,5100,5250,5750,6250,6500,7000,7500,8000];K.forEach((k,i)=>{if(book>=k)inc=V[i]})}
 const kick=ok(book)?Math.round(Math.max(book-7000,0)*0.035*60.59*100)/100:NaN;
 const q1=ok(take)&&ok(csat)&&ok(pc)?(take>=.25&&csat>=4.9&&pc>=10):null;
 document.getElementById("sales").innerHTML="<thead><tr><th>METRIC</th><th style='text-align:right'>VALUE</th></tr></thead><tbody>"+
-row3("Revenue - ACQ + CROSS (Post Recoup)",$(acq))+row3("Revenue - REN (Post Recoup)",$(ren))+row3("TOTAL",$(tot))+
+row3("ACQ",$(acq))+row3("RENEWAL",$(ren))+row3("TOTAL",$(tot))+
 row3("$/CALL",ok(pc)?`<span class="${pc<10?"lo":""}">${$(pc)}</span>`:"—")+row3("Missing ACQ (target $10/call)",$(miss))+row3("INCENTIVES",$(inc))+row3("KICKER",$(kick))+row3("QUALIFIED?",badge(q1))+"</tbody>";
 const s=[sc.aht(aht),sc.csat(csat),sc.res(res),sc.trf(trf),sc.pay(pay)];
 const pcnt=s.every(ok)?s.reduce((a,b)=>a+b,0)/5:NaN;
@@ -95,16 +95,17 @@ const sp=v=>ok(v)?Math.round(v*100)+"%":"—";
 document.getElementById("kpi").innerHTML="<thead><tr><th>METRIC</th><th style='text-align:right'>ACTUAL</th><th style='text-align:right'>SCORE</th></tr></thead><tbody>"+
 `<tr><td>Days Worked</td><td class="v" colspan="2"><input class="edit" type="number" min="0" id="dw" value="${days.w}"></td></tr>`+
 `<tr><td>Days Scheduled</td><td class="v" colspan="2"><input class="edit" type="number" min="0" id="ds" value="${days.s}"></td></tr>`+
-row3("Voice Answered AHT",N(aht),sp(s[0]))+row3("Voice CSAT",N(csat,2),sp(s[1]))+row3("Voice Agent Resolution",P(res),sp(s[2]))+row3("Transfer to Survey %",P(trf),sp(s[3]))+row3("Status - Pay to Performance",P(pay),sp(s[4]))+
+row3("AHT",N(aht),sp(s[0]))+row3("CSAT",N(csat,2),sp(s[1]))+row3("VRR",P(res),sp(s[2]))+row3("XFER TO SURVEY",P(trf),sp(s[3]))+row3("P2P",P(pay),sp(s[4]))+
 row3("ABSENCE","","100%")+row3("LATE","","100%")+row3("MULTIPLIER","",sp(mult))+row3("PERCENTAGE","",sp(pcnt))+row3("QUALIFIED?","",badge(q2))+"</tbody>";
 const dw=document.getElementById("dw"),ds=document.getElementById("ds");
 dw.oninput=()=>{days.w=parseFloat(dw.value)||0;save();render();document.getElementById("dw").focus()};
 ds.oninput=()=>{days.s=parseFloat(ds.value)||0;save();render();document.getElementById("ds").focus()};
 }
+const colName=c=>{let s="";c++;while(c>0){const m=(c-1)%26;s=String.fromCharCode(65+m)+s;c=Math.floor((c-1)/26)}return s};
 function grid(){
-const R=Math.max(data.length+8,22),C=Math.max(14,...data.map(r=>r.length));
+const R=Math.max(data.length+8,22),C=Math.max(114,...data.map(r=>r.length));
 let h="<table><thead><tr><th></th>";
-for(let c=0;c<C;c++)h+=`<th>${String.fromCharCode(65+c%26)}</th>`;
+for(let c=0;c<C;c++)h+=`<th>${colName(c)}</th>`;
 h+="</tr></thead><tbody>";
 for(let r=0;r<R;r++){h+=`<tr><td class="n">${r+1}</td>`;for(let c=0;c<C;c++){const v=(data[r]&&data[r][c])||"";h+=`<td contenteditable="true" data-r="${r}" data-c="${c}">${String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</td>`}h+="</tr>"}
 document.getElementById("sheet").innerHTML=h+"</tbody></table>";
